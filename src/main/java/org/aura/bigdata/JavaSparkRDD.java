@@ -1,7 +1,5 @@
 package org.aura.bigdata;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -9,12 +7,7 @@ import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
-import org.aura.bigdata.module.ShopInfo;
-import org.aura.bigdata.module.UserPay;
-import org.aura.bigdata.module.UserView;
-
-import java.io.Serializable;
-import java.util.Arrays;
+import org.aura.bigdata.modle.UserView;
 
 import static org.apache.spark.sql.functions.max;
 import static org.apache.spark.sql.functions.min;
