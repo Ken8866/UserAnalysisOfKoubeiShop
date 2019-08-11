@@ -1,0 +1,50 @@
+{
+  "app": {
+    "name": "",
+    "description": "Ng-zorro admin panel front-end framework"
+  },
+  "user": {
+    "name": "Admin",
+    "avatar": "./assets/tmp/img/avatar.jpg",
+    "email": "cipchk@qq.com"
+  },
+  "menu": [{
+    "text": "功能列表",
+    "group": true,
+    "children": [
+      {
+        "text": "presto",
+        "link": "/desktop/main",
+        "icon": "anticon-appstore"
+      },
+      {
+        "text": "spark",
+        "link": "/sparkrdd/main",
+        "icon": "anticon-profile"
+      },
+      {
+        "text": "spark-stream",
+        "link": "/sparkstream/main",
+        "icon": "anticon-edit"
+      },
+      {
+        "text": "功能1",
+        "link": "/dashboard/analysis",
+        "icon": "anticon-profile",
+        "children": []
+      },
+      {
+        "text": "功能2",
+        "link": "/dashboard/monitor",
+        "icon": "anticon-edit",
+        "children": []
+      },
+      {
+        "text": "功能3",
+        "link": "/dashboard/workplace",
+        "icon": "anticon-dashboard",
+        "children": []
+      }
+    ]
+  }]
+}

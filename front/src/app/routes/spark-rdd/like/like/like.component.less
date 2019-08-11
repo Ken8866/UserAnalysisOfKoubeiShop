@@ -1,0 +1,59 @@
+.title {
+  height: 30px;
+  text-align: center;
+  width: 100%;
+  font-size: 15px;
+  font-weight: bold;
+  border-radius: 3px;
+  vertical-align: middle;
+  color: white;
+  padding: 5px;
+}
+
+.rank-list {
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+
+    span {
+      color: black;
+      font-size: 14px;
+      line-height: 18px;
+    }
+
+    .number {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      margin-top: 1.5px;
+      margin-right: 8px;
+      font-weight: 600;
+      font-size: 11px;
+      line-height: 20px;
+      text-align: center;
+      background-color: lightgrey;
+
+
+      &.active {
+        color: #fff;
+        background-color: #314659;
+      }
+    }
+
+    .lt {
+      flex: 1;
+      margin-right: 4px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .value {
+      margin-right: 10px;
+    }
+  }
+}

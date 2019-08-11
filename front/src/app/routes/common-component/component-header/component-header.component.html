@@ -1,0 +1,7 @@
+<div class="app_component_header">
+  {{header}}
+  <div class="set">
+    <i class="fa fa-cog fa-1x" *ngIf="set" (click)="$event.stopPropagation();onClickSet()" aria-hidden="true"></i>
+    <i class="fa fa-arrows-alt fa-1x" *ngIf="expand" (click)="$event.stopPropagation();onClickExpand()" aria-hidden="true"></i>
+  </div>
+</div>
