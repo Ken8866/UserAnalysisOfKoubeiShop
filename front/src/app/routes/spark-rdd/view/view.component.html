@@ -1,0 +1,48 @@
+<div style="height:40px;vertical-align: middle;">
+    <table>
+        <tr>
+            <td>
+                <label style="padding-right: 5px;">商店</label>
+                <nz-select style="width: 120px;" [(ngModel)]="selectedValue" nzSize='small' nzAllowClear>
+                    <nz-option *ngFor="let i of shops" [nzLabel]="i.label" [nzValue]="i.value"></nz-option>
+                </nz-select>
+            </td>
+            <td>
+                <nz-range-picker [(ngModel)]="dateRange" [nzSize]="'small'" (ngModelChange)="onChange($event)">
+                </nz-range-picker>
+            </td>
+            <td>
+                <button nz-button nzType="primary" [nzSize]="'small'">查询</button>
+            </td>
+        </tr>
+    </table>
+</div>
+<div style="float:left;width:80px;margin-right:10px;">
+    <ul nz-menu nzMode="inline">
+        <li nz-menu-item (click)="show('day')" nzSelected>
+            天
+        </li>
+        <li nz-menu-item (click)="show('week')">
+            周
+        </li>
+        <li nz-menu-item (click)="show('month')">
+            月
+        </li>
+    </ul>
+</div>
+<div style="float:left;" [style.width.px]="width">
+    <div [ngSwitch]="selectedItem">
+        <div *ngSwitchCase="'day'">
+            <div echarts [options]="option_day" (chartInit)="onChartInit($event)" style="width:100%;height:270px;">
+            </div>
+        </div>
+        <div *ngSwitchCase="'week'">
+            <div echarts [options]="option_week" (chartInit)="onChartInit($event)" style="width:100%;height:270px;">
+            </div>
+        </div>
+        <div *ngSwitchCase="'month'">
+            <div echarts [options]="option_month" (chartInit)="onChartInit($event)" style="width:100%;height:270px;">
+            </div>
+        </div>
+    </div>
+</div>
