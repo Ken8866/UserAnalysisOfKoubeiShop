@@ -56,13 +56,11 @@ public class StreamingAnalysisResult {
         Jedis jedis = JavaRedisClient.getJedisPool().getResource();
         Set<String> jiaoyi = jedis.keys("交易*");
 
-        System.out.println(jiaoyi.size());
-
         List<ShopTrans> trans = new ArrayList<>();
         ShopTrans shopTrans = null;
         for(String shoptrans: jiaoyi){
             shopTrans = new ShopTrans();
-            shopTrans.setShopId(shoptrans.substring(3));
+            shopTrans.setShopId(shoptrans.substring(2));
             shopTrans.setCount(jedis.get(shoptrans));
             trans.add(shopTrans);
         }
