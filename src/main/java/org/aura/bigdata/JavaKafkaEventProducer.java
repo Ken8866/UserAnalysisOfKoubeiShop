@@ -39,11 +39,16 @@ public class JavaKafkaEventProducer {
                 t.forEachRemaining(new Consumer<Row>() {
                     @Override
                     public void accept(Row row) {
-                        JSONObject event = new JSONObject();
-                        event.put(row.getString(0),row.getString(1)+"."+row.getString(2));
-                        ProducerRecord<String, String> kvProducerRecord = new ProducerRecord<String, String>(topic,event.toString());
+
+                        String userId = row.getString(0);
+                        String shopId = row.getString(1);
+                        String timestamp = row.getString(2) ;
+
+                        //每隔10毫秒将userpay数据写入kafka user_pay主题中，key为userid，value为shopid+“，”+timestamp
+                        ProducerRecord<String, String> kvProducerRecord = new ProducerRecord<String, String>(topic, userId,shopId+","+timestamp);
                         kafkaProducer.send(kvProducerRecord);
-                        System.out.println("["+new Date(System.currentTimeMillis())+"] Message send: "+event);
+
+                        System.out.println("["+new Date(System.currentTimeMillis())+"] kefak msg send: "+"topic: "+topic+" key: "+userId+" value: "+timestamp );
                         try{
                             Thread.sleep(10);
                         }catch (Exception e){
