@@ -48,7 +48,7 @@ public class JavaKafkaEventProducer {
                         ProducerRecord<String, String> kvProducerRecord = new ProducerRecord<String, String>(topic, userId,shopId+","+timestamp);
                         kafkaProducer.send(kvProducerRecord);
 
-                        System.out.println("["+new Date(System.currentTimeMillis())+"] kefak msg send: "+"topic: "+topic+" key: "+userId+" value: "+timestamp );
+                        System.out.println("["+new Date(System.currentTimeMillis())+"] kefak msg send: "+"topic: "+topic+" key: "+userId+" value: "+shopId+","+timestamp );
                         try{
                             Thread.sleep(10);
                         }catch (Exception e){
