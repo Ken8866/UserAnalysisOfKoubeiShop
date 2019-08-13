@@ -34,7 +34,7 @@ public class ServiceClient {
     }
 
     public static void main(String[] args) throws Exception{
-        String resString = findUserPays();
+        String resString = findUserPay();
         System.out.println(resString);
 }
 

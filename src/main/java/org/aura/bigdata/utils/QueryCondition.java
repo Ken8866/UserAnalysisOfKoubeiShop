@@ -40,4 +40,5 @@ public class QueryCondition<T> implements Serializable {
     public void setColumn_family(String column_family) {
         this.column_family = column_family;
     }
+
 }

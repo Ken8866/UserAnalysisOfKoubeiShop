@@ -12,7 +12,9 @@ import org.aura.bigdata.model.UserPay;
 import org.aura.bigdata.model.UserView;
 import org.aura.bigdata.service.QueryService;
 import org.aura.bigdata.utils.QueryCondition;
+import org.aura.bigdata.view.vo.UserBill;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -90,13 +92,13 @@ public class QueryServiceImpl<T> implements QueryService<T> {
         entity.setRow(entity.getRow());
 
         Entity resEntity = entityDao.findEntity(entity);
-        Map<String,Map<String,String>> cell = resEntity.getCell();
-        String shopId = cell.get("colFmly").get("shop_id");
-        ShopInfo shopInfo = AppUtils.getShopInfo(shopId);
-        resEntity.setShopInfo(shopInfo);
-
-        this.resString = JSON.toJSONString(resEntity);
-
+        List<Entity> entities = new ArrayList<>();
+        if(resEntity == null){
+            this.resString = "no data can be find" ;
+        }else{
+            entities.add(resEntity);
+            this.resString = covert2UserBills(entities);
+        }
     }
 
     private void findEntities() throws Exception {
@@ -108,14 +110,7 @@ public class QueryServiceImpl<T> implements QueryService<T> {
         if(resEntities == null){
             this.resString = "no data can be find" ;
         }else{
-            for(Entity obj:resEntities){
-                Map<String,Map<String,String>> cell = obj.getCell();
-                String shopId = cell.get("colFmly").get("shop_id");
-                ShopInfo shopInfo = AppUtils.getShopInfo(shopId);
-                obj.setShopInfo(shopInfo);
-
-            }
-            this.resString = JSON.toJSONString(resEntities);
+            this.resString = covert2UserBills(resEntities);
         }
 
     }
@@ -124,5 +119,24 @@ public class QueryServiceImpl<T> implements QueryService<T> {
 
     }
 
+    private String covert2UserBills(List<Entity> resEntities) throws Exception{
+        List<UserBill> userBills = new ArrayList<>();
+        UserBill userBill = null;
+        for(Entity obj:resEntities){
+            userBill = new UserBill();
+            Map<String,Map<String,String>> cell = obj.getCell();
+            String shopId = cell.get("colFmly").get("shop_id");
+            String timestamp = cell.get("colFmly").get("time_stamp");
+            String userId = cell.get("colFmly").get("user_id");
+            ShopInfo shopInfo = AppUtils.getShopInfo(shopId);
+            userBill.setUserId(userId);
+            userBill.setTimestamp(timestamp);
+            userBill.setShopId(shopInfo.getShop_id());
+            userBill.setCityName(shopInfo.getCity_name());
+            userBill.setPerPay(String.valueOf(shopInfo.getPer_pay()));
+            userBills.add(userBill);
+        }
+        return JSON.toJSONString(userBills);
+    }
 
 }
