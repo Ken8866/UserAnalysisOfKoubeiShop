@@ -10,19 +10,9 @@ public class AppUtils {
 
     public static Map<String,ShopInfo> shopInfoMap = new HashMap<>() ;
 
-    public static void main(String[] args) {
-        try {
-            Properties properties = getProperties("hbase.properties");
-            String o = properties.getProperty("prop.test");
-            initShopInfo(AppConstants.SHOP_INFO_PATH);
-            Set<Map.Entry<String, ShopInfo>> entries = shopInfoMap.entrySet();
-            for (Map.Entry<String, ShopInfo> obj:entries){
-                System.out.println(obj.getKey()+"->"+obj.getValue().getPer_pay());
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public static void main(String[] args) throws Exception {
+        Properties properties = getProperties("hbase.properties");
+        System.out.println(properties.getProperty("prop.test"));
     }
 
     public static Properties getProperties(String file) throws Exception{
@@ -52,11 +42,13 @@ public class AppUtils {
         fr.close();
         return lines ;
     }
+
     public static void waitProcess(List<String> lines) throws Exception{
         System.out.println("#####################"+lines.size()+"###########################");
         ServiceClient.dataImport(lines) ;
         System.out.println(lines.get(lines.size()-1));
     }
+
     public static void initShopInfo(String filePath) throws Exception{
         File file = new File(filePath) ;
         List<String> list = FileUtils.readLines(file);
