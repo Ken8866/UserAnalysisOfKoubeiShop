@@ -34,7 +34,7 @@ public class ServiceClient {
     }
 
     public static void main(String[] args) throws Exception{
-        String resString = findUserPay();
+        String resString = findUserPays();
         System.out.println(resString);
 }
 
@@ -85,7 +85,7 @@ public class ServiceClient {
         QueryCondition<UserPay> queryCondition = new QueryCondition<>();
         queryCondition.setT(userPay);
         queryCondition.setTime_stamp_range(new String[]{"2015-11-24 00:00:00","2018-12-24 24:00:00"});
-        queryCondition.setUser_id("9990843");
+        queryCondition.setUser_id("20621399");
         queryCondition.setColumn_family("colFmly");
 
         Entity<UserPay> userPayEntity = new Entity<UserPay>();

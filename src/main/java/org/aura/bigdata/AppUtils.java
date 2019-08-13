@@ -9,10 +9,12 @@ import java.util.*;
 public class AppUtils {
 
     public static Map<String,ShopInfo> shopInfoMap = new HashMap<>() ;
+    private static boolean stopReadFile = false;
 
     public static void main(String[] args) throws Exception {
-        Properties properties = getProperties("hbase.properties");
-        System.out.println(properties.getProperty("prop.test"));
+//        Properties properties = getProperties("hbase.properties");
+//        System.out.println(properties.getProperty("prop.test"));
+        readFile(AppConstants.USER_PAY_PATH);
     }
 
     public static Properties getProperties(String file) throws Exception{
@@ -37,6 +39,7 @@ public class AppUtils {
                 lines.clear();
                 size=0 ;
             }
+            if(stopReadFile) break;
         };
         br.close();
         fr.close();
@@ -45,8 +48,9 @@ public class AppUtils {
 
     public static void waitProcess(List<String> lines) throws Exception{
         System.out.println("#####################"+lines.size()+"###########################");
-        ServiceClient.dataImport(lines) ;
-        System.out.println(lines.get(lines.size()-1));
+//        ServiceClient.dataImport(lines) ;
+        printMostUserId(lines);
+        stopReadFile = true ;
     }
 
     public static void initShopInfo(String filePath) throws Exception{
@@ -69,5 +73,35 @@ public class AppUtils {
             shopInfo = shopInfoMap.get(shopId);
         }
         return  shopInfo ;
+    }
+
+    public static void printMostUserId(List<String> lines){
+        Map<String,List<String>> userPay = new HashMap();
+        for (String line:lines){
+            String[] split = line.split(",");
+            String userId = split[0] ;
+            if(userPay.containsKey(userId)){
+                userPay.get(userId).add(line);
+            }else{
+                ArrayList<String> tmpList = new ArrayList<>();
+                tmpList.add(line);
+                userPay.put(userId,tmpList);
+            }
+        }
+        stopReadFile = true ;
+        Set<Map.Entry<String, List<String>>> entries = userPay.entrySet();
+        String mostUserId = "" ;
+        List<String> mostUserPayList = null;
+        long maxSize = 0 ;
+        for (Map.Entry<String, List<String>> entry:entries){
+            String  userId = entry.getKey();
+            List<String> value = entry.getValue();
+            if (maxSize<value.size()){
+                maxSize = value.size();
+                mostUserId = userId ;
+                mostUserPayList = value ;
+            }
+        }
+        System.out.println("mostUserId: "+mostUserId+",size: "+maxSize);
     }
 }
