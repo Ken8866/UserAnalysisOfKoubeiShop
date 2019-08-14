@@ -7,11 +7,12 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.ForeachFunction;
-import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.PairFunction;
-import org.apache.spark.api.java.function.VoidFunction;
+import org.apache.spark.api.java.Optional;
+import org.apache.spark.api.java.function.*;
 import org.apache.spark.streaming.Durations;
+import org.apache.spark.streaming.State;
+import org.apache.spark.streaming.StateSpec;
+import org.apache.spark.streaming.api.java.JavaMapWithStateDStream;
 import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaPairInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
@@ -20,6 +21,7 @@ import org.mortbay.util.ajax.JSON;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import scala.Option;
 import scala.Tuple2;
 
 import java.util.*;
@@ -39,6 +41,7 @@ public class JavaKafkaEventConsumer {
 
         //每隔1秒为一个batch
         JavaStreamingContext jssc = new JavaStreamingContext(conf, Durations.seconds(1));
+//        jssc.checkpoint("/tmp/kafkaUserPay");
         jssc.sparkContext().setLogLevel("WARN");
         JavaPairInputDStream<String, String> kafkaDstream = KafkaUtils.createDirectStream(jssc,
                 String.class, String.class,
@@ -71,9 +74,22 @@ public class JavaKafkaEventConsumer {
 
         //实时统计商家交易次数，每10秒统计一次
         JavaPairDStream<String, Long> countJavaPairDstream = userPayJavaPairDstream.window(Durations.seconds(10)).reduceByKey((x, y) -> x + y);
+        JavaMapWithStateDStream<String, Long, Long, Tuple2<String, Long>> shopCountWithStateDStream = countJavaPairDstream.mapWithState(StateSpec.function(new Function3<String, Optional<Long>, State<Long>, Tuple2<String, Long>>() {
+            @Override
+            public Tuple2<String, Long> call(String key, Optional<Long> value, State<Long> state) throws Exception {
+                Option<Long> statCount = state.getOption();
+                Long sum = value.orElse(Long.valueOf(0));
+                if (statCount.isDefined()) {
+                    sum += statCount.get();
+                }
+                state.update(sum);
+                return new Tuple2<String, Long>(key, sum);
+            }
+        }));
 
         //实时统计商家交易次数的结果保存到redis中
-        countJavaPairDstream.foreachRDD(new VoidFunction<JavaPairRDD<String, Long>>() {
+//        countJavaPairDstream.foreachRDD(new VoidFunction<JavaPairRDD<String, Long>>() {
+        shopCountWithStateDStream.stateSnapshots().foreachRDD(new VoidFunction<JavaPairRDD<String, Long>>() {
             @Override
             public void call(JavaPairRDD<String, Long> shopIdCountPairRDD) throws Exception {
                 shopIdCountPairRDD.foreachPartition(new VoidFunction<Iterator<Tuple2<String, Long>>>() {
@@ -93,6 +109,7 @@ public class JavaKafkaEventConsumer {
             }
         });
 
+
         JavaSparkContext sc = jssc.sparkContext();
         sc.setLogLevel("WARN");
         JavaRDD<String> rdd = sc.textFile("hdfs://bigdata:9000/koubei/sqoopdata");
@@ -104,12 +121,27 @@ public class JavaKafkaEventConsumer {
         });
 
         //count and save transaction by city
-        userPayJavaPairDstream.window(Durations.seconds(10)).mapToPair(new PairFunction<Tuple2<String, Long>, String, Long>() {
+        JavaPairDStream<String, Long> cityPairDStream = userPayJavaPairDstream.window(Durations.seconds(10)).mapToPair(new PairFunction<Tuple2<String, Long>, String, Long>() {
             @Override
             public Tuple2<String, Long> call(Tuple2<String, Long> stringLongTuple2) throws Exception {
-                return new Tuple2<>(stringLongTuple2._1().substring(6),Long.valueOf(stringLongTuple2._2()));
+                return new Tuple2<>(stringLongTuple2._1().substring(6), Long.valueOf(stringLongTuple2._2()));
             }
-        }).foreachRDD(new VoidFunction<JavaPairRDD<String, Long>>() {
+        });
+        JavaMapWithStateDStream<String, Long, Long, Tuple2<String, Long>> cityCountWithStateDStream = cityPairDStream.mapWithState(StateSpec.function(new Function3<String, Optional<Long>, State<Long>, Tuple2<String, Long>>() {
+            @Override
+            public Tuple2<String, Long> call(String key, Optional<Long> value, State<Long> state) throws Exception {
+                Option<Long> statCount = state.getOption();
+                Long sum = value.orElse(Long.valueOf(0));
+                if (statCount.isDefined()) {
+                    sum += statCount.get();
+                }
+                state.update(sum);
+                return new Tuple2<String, Long>(key, sum);
+            }
+        }));
+
+//        cityPairDStream.foreachRDD(new VoidFunction<JavaPairRDD<String, Long>>() {
+        cityCountWithStateDStream.stateSnapshots().foreachRDD(new VoidFunction<JavaPairRDD<String, Long>>() {
             @Override
             public void call(JavaPairRDD<String, Long> stringLongJavaPairRDD) throws Exception {
 
@@ -137,6 +169,8 @@ public class JavaKafkaEventConsumer {
                 });
             }
         });
+
+        jssc.checkpoint("/tmp/kafkaUserPay");
 
          jssc.start();
          jssc.awaitTermination();
