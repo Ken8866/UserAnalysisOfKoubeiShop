@@ -99,9 +99,9 @@ public class MetricsAnalysis implements Serializable {
         userPayDF.createOrReplaceTempView("user_pay");
         SQLContext userPaySqlContext = userPayDF.sqlContext();
 
-        String sql1 = "select user_id ,count(distinct shop_id) as last_7_day_review from user_pay  where trunc(to_date(time_stamp),'MM') BETWEEN date_sub(to_date('2016-10-31'),7) AND to_date('2016-10-31') group by user_id" ;
-        String sql2 = "select user_id ,count(distinct shop_id) as last_1_month_review from user_pay  where trunc(to_date(time_stamp),'MM') BETWEEN add_months(to_date('2016-10-31'),-1) AND to_date('2016-10-31') group by user_id" ;
-        String sql3 = "select user_id ,count(distinct shop_id) as last_3_month_review from user_pay  where trunc(to_date(time_stamp),'MM') BETWEEN add_months(to_date('2016-10-31'),-3) AND to_date('2016-10-31') group by user_id" ;
+        String sql1 = "select user_id ,count(distinct shop_id) as last_7_day_payed from user_pay  where trunc(to_date(time_stamp),'MM') BETWEEN date_sub(to_date('2016-10-31'),7) AND to_date('2016-10-31') group by user_id" ;
+        String sql2 = "select user_id ,count(distinct shop_id) as last_1_month_payed from user_pay  where trunc(to_date(time_stamp),'MM') BETWEEN add_months(to_date('2016-10-31'),-1) AND to_date('2016-10-31') group by user_id" ;
+        String sql3 = "select user_id ,count(distinct shop_id) as last_3_month_payed from user_pay  where trunc(to_date(time_stamp),'MM') BETWEEN add_months(to_date('2016-10-31'),-3) AND to_date('2016-10-31') group by user_id" ;
 
         String sql4 = "select shop_id ,count(*) as last_7_day_payed from user_pay  where trunc(to_date(time_stamp),'MM') BETWEEN date_sub(to_date('2016-10-31'),7) AND to_date('2016-10-31') group by shop_id" ;
         String sql5 = "select shop_id ,count(*) as last_1_month_payed from user_pay  where trunc(to_date(time_stamp),'MM') BETWEEN add_months(to_date('2016-10-31'),-1) AND to_date('2016-10-31') group by shop_id" ;
