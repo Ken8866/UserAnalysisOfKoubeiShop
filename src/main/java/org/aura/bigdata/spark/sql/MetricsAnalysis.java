@@ -230,7 +230,7 @@ public class MetricsAnalysis implements Serializable {
                 public void call(Iterator<Row> t) throws Exception {
 
                     Configuration conf = HBaseConfiguration.create();
-                    conf.set("hbase.zookeeper.quorum","hadoopnode");
+                    conf.set("hbase.zookeeper.quorum","bigdata");
                     conf.set("zookeeper.znode.parent", "/hbase");
                     Connection conn = ConnectionFactory.createConnection(conf);
                     Table userlabels = conn.getTable(TableName.valueOf("userlabels"));

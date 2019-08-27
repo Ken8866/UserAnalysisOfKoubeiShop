@@ -6,10 +6,7 @@ import org.aura.bigdata.AppConstants;
 import org.aura.bigdata.AppUtils;
 import org.aura.bigdata.dao.EntityDao;
 import org.aura.bigdata.dao.impl.EntityDaoImpl;
-import org.aura.bigdata.model.Entity;
-import org.aura.bigdata.model.ShopInfo;
-import org.aura.bigdata.model.UserPay;
-import org.aura.bigdata.model.UserView;
+import org.aura.bigdata.model.*;
 import org.aura.bigdata.service.QueryService;
 import org.aura.bigdata.utils.QueryCondition;
 import org.aura.bigdata.view.vo.UserBill;
@@ -97,7 +94,14 @@ public class QueryServiceImpl<T> implements QueryService<T> {
             this.resString = "no data can be find" ;
         }else{
             entities.add(resEntity);
-            this.resString = covert2UserBills(entities);
+            if(entity.getName().equals("userlabels")){
+                this.resString = covert2UserLabels(entities);
+            }else if(entity.getName().equals("shoplabels")){
+                this.resString = covert2ShopLabels(entities);
+            }else {
+                this.resString = covert2UserBills(entities);
+            }
+
         }
     }
 
@@ -111,7 +115,13 @@ public class QueryServiceImpl<T> implements QueryService<T> {
         if(resEntities == null){
             this.resString = "no data can be find" ;
         }else{
-            this.resString = covert2UserBills(resEntities);
+            if(entity.getName().equals("userlabels")){
+                this.resString = covert2UserLabels(resEntities);
+            }else if(entity.getName().equals("shoplabels")){
+                this.resString = covert2ShopLabels(resEntities);
+            }else {
+                this.resString = covert2UserBills(resEntities);
+            }
         }
 
     }
@@ -140,4 +150,62 @@ public class QueryServiceImpl<T> implements QueryService<T> {
         return JSON.toJSONString(userBills);
     }
 
+    private String covert2UserLabels(List<Entity> resEntities) throws Exception{
+        List<UserLabels> userLabelsList = new ArrayList<>();
+        UserLabels userLabels = null;
+        for(Entity obj:resEntities){
+            userLabels = new UserLabels();
+            Map<String,Map<String,String>> cell = obj.getCell();
+            String last_7_day_review = cell.get("colFmly").get("last_7_day_review");
+            String last_1_month_review = cell.get("colFmly").get("last_1_month_review");
+            String last_3_month_review = cell.get("colFmly").get("last_3_month_review");
+
+            String last_7_day_pay = cell.get("colFmly").get("last_7_day_pay");
+            String last_1_month_pay = cell.get("colFmly").get("last_1_month_pay");
+            String last_3_month_pay = cell.get("colFmly").get("last_3_month_pay");
+
+            String user_city = cell.get("colFmly").get("user_city");
+
+            userLabels.setLast_7_day_review(last_7_day_review);
+            userLabels.setLast_1_month_review(last_1_month_review);
+            userLabels.setLast_3_month_review(last_3_month_review);
+            userLabels.setLast_7_day_pay(last_7_day_pay);
+            userLabels.setLast_1_month_pay(last_1_month_pay);
+            userLabels.setLast_3_month_pay(last_3_month_pay);
+            userLabels.setUser_city(user_city);
+
+            userLabelsList.add(userLabels);
+        }
+        return JSON.toJSONString(userLabelsList);
+    }
+
+
+    private String covert2ShopLabels(List<Entity> resEntities) throws Exception{
+        List<ShopLabels> shopLabelsList = new ArrayList<>();
+        ShopLabels shopLabels = null;
+        for(Entity obj:resEntities){
+            shopLabels = new ShopLabels();
+            Map<String,Map<String,String>> cell = obj.getCell();
+            String last_7_day_reviewed = cell.get("colFmly").get("last_7_day_reviewed");
+            String last_1_month_reviewed = cell.get("colFmly").get("last_1_month_reviewed");
+            String last_3_month_reviewed = cell.get("colFmly").get("last_3_month_reviewed");
+
+            String last_7_day_payed = cell.get("colFmly").get("last_7_day_payed");
+            String last_1_month_payed = cell.get("colFmly").get("last_1_month_payed");
+            String last_3_month_payed = cell.get("colFmly").get("last_3_month_payed");
+
+            String score = cell.get("colFmly").get("score");
+
+            shopLabels.setLast_7_day_reviewed(last_7_day_reviewed);
+            shopLabels.setLast_1_month_reviewed(last_1_month_reviewed);
+            shopLabels.setLast_3_month_reviewed(last_3_month_reviewed);
+            shopLabels.setLast_7_day_payed(last_7_day_payed);
+            shopLabels.setLast_1_month_payed(last_1_month_payed);
+            shopLabels.setLast_3_month_payed(last_3_month_payed);
+            shopLabels.setScore(score);
+
+            shopLabelsList.add(shopLabels);
+        }
+        return JSON.toJSONString(shopLabelsList);
+    }
 }

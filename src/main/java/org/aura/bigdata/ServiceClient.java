@@ -4,10 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.JsonObject;
 import org.aura.bigdata.dao.base.HbaseDaoBase;
-import org.aura.bigdata.model.Entity;
-import org.aura.bigdata.model.UserLabels;
-import org.aura.bigdata.model.UserPay;
-import org.aura.bigdata.model.UserView;
+import org.aura.bigdata.model.*;
 import org.aura.bigdata.service.QueryService;
 import org.aura.bigdata.service.impl.QueryServiceImpl;
 import org.aura.bigdata.utils.QueryCondition;
@@ -21,23 +18,41 @@ import java.util.Map;
 
 public class ServiceClient {
 
-    public static final String USER_PAY_PATH = "D:\\gitrepo\\koubeishopanalysis\\src\\datasource\\user_pay.txt" ;
-    public static final String USER_VIEW_PATH = "D:\\gitrepo\\koubeishopanalysis\\src\\datasource\\user_view.txt" ;
-    public static final String SHOP_INFO_PATH = "D:\\gitrepo\\koubeishopanalysis\\src\\datasource\\shop_info.txt" ;
+    public static final String USER_VIEW_URL = "datasource/user_view.txt" ;
+    public static final String USER_PAY_URL = "datasource/user_pay.txt" ;
+    public static final String SHOP_INFO_URL = "datasource/shop_info.txt" ;
 
     static {
         try {
             HbaseDaoBase.initConf();
-            AppUtils.initShopInfo(SHOP_INFO_PATH);
+            AppUtils.initShopInfo(SHOP_INFO_URL);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * 服务调用方法入口
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception{
-        String resString = findUserPays();
+        String resString = findShopLabels();
         System.out.println(resString);
 }
+    public static QueryService getUserLabelsQueryService() throws Exception {
+        QueryService userLabelsQueryService = new QueryServiceImpl<UserLabels>();
+        UserLabels userLabels = new UserLabels();;
+        userLabelsQueryService.setT(userLabels);
+        return  userLabelsQueryService ;
+    }
+
+    public static QueryService getShopLabelsQueryService() throws Exception {
+        QueryService shopLabelsQueryService = new QueryServiceImpl<ShopLabels>();
+        ShopLabels shopLabels = new ShopLabels();;
+        shopLabelsQueryService.setT(shopLabels);
+        return  shopLabelsQueryService ;
+    }
 
     public static QueryService getUserPayQueryService() throws Exception {
         QueryService userPayQueryService = new QueryServiceImpl<UserPay>();
@@ -74,16 +89,39 @@ public class ServiceClient {
     }
 
 
+    /**
+     * 根据用户id获取用户标签
+     * @return
+     * @throws Exception
+     */
     public static String findUserLabels() throws Exception{
-        QueryService<UserLabels> userPayQueryService = getUserPayQueryService();
-        UserLabels userLabels = userPayQueryService.getT();
+        QueryService<UserLabels> userLabelsQueryService = getUserLabelsQueryService();
+        UserLabels userLabels = userLabelsQueryService.getT();
         Entity<UserLabels> userLabelsEntity = new Entity<UserLabels>();
         userLabelsEntity.setT(userLabels);
         userLabelsEntity.setColumnFamily(new String[]{"colFmly"});
-        userLabelsEntity.setRow("9990843");
+        userLabelsEntity.setRow("20314925");
 
         String jsonParam = JSON.toJSONString(userLabelsEntity);
-        String resString = userPayQueryService.execute(jsonParam,AppConstants.SVC_TYPE_FIND);
+        String resString = userLabelsQueryService.execute(jsonParam,AppConstants.SVC_TYPE_FIND);
+        return resString ;
+    }
+
+    /**
+     * 根据商家id获取商家表签
+     * @return
+     * @throws Exception
+     */
+    public static String findShopLabels() throws Exception{
+        QueryService<ShopLabels> shopLabelQueryService = getShopLabelsQueryService();
+        ShopLabels shopLabels = shopLabelQueryService.getT();
+        Entity<ShopLabels> shopLabelsEntity = new Entity<ShopLabels>();
+        shopLabelsEntity.setT(shopLabels);
+        shopLabelsEntity.setColumnFamily(new String[]{"colFmly"});
+        shopLabelsEntity.setRow("1852");
+
+        String jsonParam = JSON.toJSONString(shopLabelsEntity);
+        String resString = shopLabelQueryService.execute(jsonParam,AppConstants.SVC_TYPE_FIND);
         return resString ;
     }
 
@@ -134,7 +172,7 @@ public class ServiceClient {
      * @throws Exception
      */
     public static void saveOrUpdate() throws Exception{
-        AppUtils.readFile(USER_PAY_PATH);
+        AppUtils.readFile(USER_PAY_URL);
     }
 
     /**
