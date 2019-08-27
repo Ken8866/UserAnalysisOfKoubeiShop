@@ -14,6 +14,7 @@ import org.aura.bigdata.model.Entity;
 import org.aura.bigdata.model.UserPay;
 import org.aura.bigdata.utils.QueryCondition;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 
@@ -36,20 +37,27 @@ public class EntityDaoImpl<T> extends HbaseDaoBase implements EntityDao, Seriali
      */
     @Override
     public void saveOrUpdate(Entity entity) throws Exception{
-        Table table = getTable(entity.getName());
-        Map<String, Map<String,String>> cell = entity.getCell();
-        Set<Map.Entry<String, Map<String, String>>> entries = cell.entrySet();
-        for(Map.Entry<String, Map<String, String>> entry: entries){
-            Put put = new Put(Bytes.toBytes(entity.getRow()));
-            String family = entry.getKey();
-            Set<Map.Entry<String, String>> qualifierValues = entry.getValue().entrySet();
-            for(Map.Entry<String, String>  qualifierValue: qualifierValues){
-                put.addColumn(Bytes.toBytes(family),Bytes.toBytes(qualifierValue.getKey()),Bytes.toBytes(qualifierValue.getValue()));
+        Table table = null ;
+        try{
+            table = getTable(entity.getName());
+            Map<String, Map<String,String>> cell = entity.getCell();
+            Set<Map.Entry<String, Map<String, String>>> entries = cell.entrySet();
+            for(Map.Entry<String, Map<String, String>> entry: entries){
+                Put put = new Put(Bytes.toBytes(entity.getRow()));
+                String family = entry.getKey();
+                Set<Map.Entry<String, String>> qualifierValues = entry.getValue().entrySet();
+                for(Map.Entry<String, String>  qualifierValue: qualifierValues){
+                    put.addColumn(Bytes.toBytes(family),Bytes.toBytes(qualifierValue.getKey()),Bytes.toBytes(qualifierValue.getValue()));
+                }
+                table.put(put);
             }
-            table.put(put);
+        }catch (IOException e){
+            throw e;
+        }finally {
+            table.close();
+            closeConn();
         }
-        table.close();
-        closeConn();
+
     }
 
     /**

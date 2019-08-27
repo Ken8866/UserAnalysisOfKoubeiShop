@@ -6,7 +6,9 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.ForeachPartitionFunction;
@@ -55,15 +57,15 @@ public class MetricsAnalysis implements Serializable {
         sparkSession.sparkContext().setLogLevel("WARN");
         MetricsAnalysis metricsAnalysis = new MetricsAnalysis();
 
-//        List<Dataset<Row>> userPayAnalysis = metricsAnalysis.userPayAnalysis(sparkSession, USER_PAY_URL);
+        List<Dataset<Row>> userPayAnalysis = metricsAnalysis.userPayAnalysis(sparkSession, USER_PAY_URL);
         shopInfoDataSet = metricsAnalysis.shopInfoAnalysis(sparkSession, SHOP_INFO_URL);
         shopInfoDataSet.cache();
         List<Dataset<Row>> userViewAnalysis = metricsAnalysis.userViewAnalysis(sparkSession, USER_VIEW_URL);
 
 
-//        metricsAnalysis.saveAnalysisResult(userPayAnalysis);
+        metricsAnalysis.saveAnalysisResult(userPayAnalysis);
         metricsAnalysis.saveAnalysisResult(userViewAnalysis);
-//        metricsAnalysis.saveAnalysisResult(shopInfoAnalysis);
+        metricsAnalysis.saveShopScore(shopInfoDataSet);
 
         sparkSession.stop();
     }
@@ -171,7 +173,6 @@ public class MetricsAnalysis implements Serializable {
         });
 
         Dataset<Row> userViewDF = sparkSession.createDataFrame(userViewRDD,UserView.class);
-
         userViewDF.createOrReplaceTempView("user_view");
         SQLContext userViewSqlContext = userViewDF.sqlContext();
 
@@ -186,12 +187,12 @@ public class MetricsAnalysis implements Serializable {
 
         String sql7 = "select user_id, shop_id, count(*) as count from user_view group by user_id, shop_id order by user_id, shop_id " ;
 
-//        String[] sqls = new String[]{sql1, sql2, sql3, sql4, sql5, sql6};
-//
-//        for (String sql:sqls){
-//            Dataset<Row> dataset= userViewSqlContext.sql(sql);
-//            datasets.add(dataset);
-//        }
+        String[] sqls = new String[]{sql1, sql2, sql3, sql4, sql5, sql6};
+
+        for (String sql:sqls){
+            Dataset<Row> dataset= userViewSqlContext.sql(sql);
+            datasets.add(dataset);
+        }
 
         Dataset<Row> userCountView = userViewSqlContext.sql(sql7);
         userCountView.createOrReplaceTempView("user_view_count");
@@ -203,6 +204,14 @@ public class MetricsAnalysis implements Serializable {
         return datasets;
     }
 
+    public void saveShopScore(Dataset<Row> shopInfoDataSet) throws Exception{
+        Dataset<Row> shopScoreDS = shopInfoDataSet.select("shop_id", "score");
+        List<Dataset<Row>> shopScoreDSList = new ArrayList<>();
+        shopScoreDSList.add(shopScoreDS);
+        saveAnalysisResult(shopScoreDSList);
+    }
+
+
     /**
      * 保存分析结果
      * @param results
@@ -213,41 +222,57 @@ public class MetricsAnalysis implements Serializable {
         for(Dataset<Row> result:results){
             StructType schema = result.schema();
             StructField[] fields = schema.fields();
+            String tableKey = fields[0].name();
             String qulifier = fields[1].name();
 
             result.foreachPartition(new ForeachPartitionFunction<Row>() {
                 @Override
                 public void call(Iterator<Row> t) throws Exception {
 
-//                    EntityDaoImpl  entityDao = new EntityDaoImpl<>();
-//                    entityDao.initConf("bigdata","/hbase");
+                    Configuration conf = HBaseConfiguration.create();
+                    conf.set("hbase.zookeeper.quorum","hadoopnode");
+                    conf.set("zookeeper.znode.parent", "/hbase");
+                    Connection conn = ConnectionFactory.createConnection(conf);
+                    Table userlabels = conn.getTable(TableName.valueOf("userlabels"));
+                    Table shoplabels = conn.getTable(TableName.valueOf("shoplabels"));
 
                     t.forEachRemaining(new Consumer<Row>() {
                         @Override
                         public void accept(Row row) {
                             try {
-
                                 Entity entity = new Entity();
                                 entity.setRow(String.valueOf(row.get(0)));
-
                                 HashMap<String, Map<String,String>>cell = new HashMap<>(1);
                                 Map<String,String> qualifierValueMap = new HashMap<String,String>();
+                                String value = "" ;
                                 if(qulifier.startsWith("last_")){
+                                    value = String.valueOf(row.getLong(1));
                                     qualifierValueMap.put(qulifier,String.valueOf(row.getLong(1)));
                                 }else{
+                                    value = row.getString(1);
                                     qualifierValueMap.put(qulifier,row.getString(1));
                                 }
-
                                 cell.put("colFmly",qualifierValueMap);
                                 entity.setCell(cell);
-
                                 System.out.println(JSON.toJSONString(entity));
-//                                entityDao.saveOrUpdate(entity);
+
+                                Put put = new Put(Bytes.toBytes(row.getString(0)));
+                                put.addColumn(Bytes.toBytes("colFmly"),Bytes.toBytes(qulifier),Bytes.toBytes(value));
+                                if("shop_id".equals(tableKey)){
+                                    shoplabels.put(put);
+                                }else{
+                                    userlabels.put(put);
+                                }
+
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
                         }
                     });
+
+                    if(userlabels!=null) userlabels.close();
+                    if(shoplabels!=null) shoplabels.close();
+                    if(conn!=null) conn.close();
 
                 }
             });

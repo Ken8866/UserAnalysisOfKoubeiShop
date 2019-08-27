@@ -2,6 +2,7 @@ package org.aura.bigdata.dao;
 
 import org.aura.bigdata.model.Entity;
 
+import java.io.Serializable;
 import java.util.List;
 
 public interface EntityDao {
