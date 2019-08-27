@@ -32,14 +32,21 @@ public class ServiceClient {
     }
 
     /**
-     * 服务调用方法入口
-     * @param args
+     * 服务调用或测试方法入口
+     * @param args 返回查询结果为Json串
      * @throws Exception
      */
     public static void main(String[] args) throws Exception{
         String resString = findShopLabels();
         System.out.println(resString);
-}
+    }
+
+
+    /**
+     * 创建一个userLabels的查询Service
+     * @return
+     * @throws Exception
+     */
     public static QueryService getUserLabelsQueryService() throws Exception {
         QueryService userLabelsQueryService = new QueryServiceImpl<UserLabels>();
         UserLabels userLabels = new UserLabels();;
@@ -47,6 +54,11 @@ public class ServiceClient {
         return  userLabelsQueryService ;
     }
 
+    /**
+     * 创建一个shopLabels的查询Service
+     * @return
+     * @throws Exception
+     */
     public static QueryService getShopLabelsQueryService() throws Exception {
         QueryService shopLabelsQueryService = new QueryServiceImpl<ShopLabels>();
         ShopLabels shopLabels = new ShopLabels();;
@@ -54,6 +66,11 @@ public class ServiceClient {
         return  shopLabelsQueryService ;
     }
 
+    /**
+     * 创建一个userBill的查询Service
+     * @return
+     * @throws Exception
+     */
     public static QueryService getUserPayQueryService() throws Exception {
         QueryService userPayQueryService = new QueryServiceImpl<UserPay>();
         UserPay userPay = new UserPay();;
@@ -61,6 +78,11 @@ public class ServiceClient {
         return  userPayQueryService ;
     }
 
+    /**
+     * Count UserBill总数，内部使用scan扫描实现
+     * @return
+     * @throws Exception
+     */
     public static String countUserPay() throws Exception{
 
         QueryService<UserPay> userPayQueryService = getUserPayQueryService();
@@ -75,6 +97,11 @@ public class ServiceClient {
         return resString;
     }
 
+    /**
+     * 根据user_id 及 times_tamp查询账单
+     * @return
+     * @throws Exception
+     */
     public static String findUserPay() throws Exception{
         QueryService<UserPay> userPayQueryService = getUserPayQueryService();
         UserPay userPay = userPayQueryService.getT();
@@ -90,7 +117,7 @@ public class ServiceClient {
 
 
     /**
-     * 根据用户id获取用户标签
+     * 根据用户id查询用户标签
      * @return
      * @throws Exception
      */
@@ -108,7 +135,7 @@ public class ServiceClient {
     }
 
     /**
-     * 根据商家id获取商家表签
+     * 根据商家id查询商家表签
      * @return
      * @throws Exception
      */
@@ -126,7 +153,7 @@ public class ServiceClient {
     }
 
     /**
-     * find user pay by condition
+     * 根据user_id 及 times_tamp区间查询账单
      * @return
      * @throws Exception
      */
@@ -151,24 +178,7 @@ public class ServiceClient {
     }
 
     /**
-     * count user view example not implement
-     * @return
-     * @throws Exception
-     */
-    public static String countUserView() throws Exception{
-        QueryService userViewQueryService = new QueryServiceImpl<UserView>();
-        UserView userView = new UserView();;
-        userViewQueryService.setT(userView);
-        Entity<UserView> userViewEntity = new Entity<UserView>();
-        userViewEntity.setT(userView);
-
-        String jsonParam = JSON.toJSONString(userViewEntity);
-//        String resString = userViewQueryService.execute(jsonParam,AppConstants.SVC_TYPE_COUNT);
-        return null;
-    }
-
-    /**
-     * read file data and import to hbase
+     * 读入user_pay数据导入Hbase（1）
      * @throws Exception
      */
     public static void saveOrUpdate() throws Exception{
@@ -176,8 +186,7 @@ public class ServiceClient {
     }
 
     /**
-     * import data to hbase
-     * @param lines
+     * 读入user_pay数据导入Hbase（2）
      * @throws Exception
      */
     public static void dataImport(List<String> lines) throws Exception {
