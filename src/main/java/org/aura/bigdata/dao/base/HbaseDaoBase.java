@@ -12,9 +12,10 @@ import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.aura.bigdata.AppUtils;
 
+import java.io.Serializable;
 import java.util.Properties;
 
-public class HbaseDaoBase {
+public class HbaseDaoBase implements Serializable {
 
     private Connection conn = null ;
     private Table table = null ;
@@ -27,6 +28,12 @@ public class HbaseDaoBase {
     public static void initConf() throws Exception{
         conf = HBaseConfiguration.create();
         conf.addResource("hbase-site.xml");
+    }
+
+    public static void initConf(String zkUrl,String hbaseRoot) throws Exception{
+        conf = HBaseConfiguration.create();
+        conf.set("hbase.zookeeper.quorum",zkUrl);
+        conf.set("zookeeper.znode.parent", hbaseRoot);
     }
 
     /**

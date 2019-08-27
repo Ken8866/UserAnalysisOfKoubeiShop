@@ -6,7 +6,7 @@ public class ShopInfo {
     private String city_name = null;
     private String location_id = null;
     private Long per_pay = null;
-    private Integer score = null;
+    private String score = null;
     private Integer comment_cnt = null;
     private Integer shop_level = null;
     private String cate_1_name = null;
@@ -45,11 +45,11 @@ public class ShopInfo {
         this.per_pay = per_pay;
     }
 
-    public Integer getScore() {
+    public String getScore() {
         return score;
     }
 
-    public void setScore(Integer score) {
+    public void setScore(String score) {
         this.score = score;
     }
 

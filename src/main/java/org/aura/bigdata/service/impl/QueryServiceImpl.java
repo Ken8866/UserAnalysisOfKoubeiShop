@@ -106,7 +106,8 @@ public class QueryServiceImpl<T> implements QueryService<T> {
         entity.setT(t);
         entity.setName(t.getClass().getSimpleName().toLowerCase());
 
-        List<Entity> resEntities = entityDao.findEntities(entity);
+//        List<Entity> resEntities = entityDao.findEntitiesByRowRange(entity);
+          List<Entity> resEntities = entityDao.findEntities(entity);
         if(resEntities == null){
             this.resString = "no data can be find" ;
         }else{

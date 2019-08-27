@@ -14,11 +14,20 @@ import org.aura.bigdata.model.Entity;
 import org.aura.bigdata.model.UserPay;
 import org.aura.bigdata.utils.QueryCondition;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class EntityDaoImpl<T> extends HbaseDaoBase implements EntityDao {
+public class EntityDaoImpl<T> extends HbaseDaoBase implements EntityDao, Serializable {
 
     private T t ;
+
+    /**
+     * 初始化数据库连接
+     * @throws Exception
+     */
+    protected void initHbaseConf(String zkurl,String hbaseRoot) throws Exception{
+        super.initConf(zkurl,hbaseRoot);
+    }
 
     /**
      * insert an row data
@@ -88,6 +97,29 @@ public class EntityDaoImpl<T> extends HbaseDaoBase implements EntityDao {
 
         FilterList filterList = new FilterList(filters);
         scan.setFilter(filterList);
+
+        ResultScanner resultScanner = table.getScanner(scan);
+        entities = parseEntityList(resultScanner);
+        return entities;
+    }
+
+    /**
+     * scan some row data by row range
+     * @param entity
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public List<Entity> findEntitiesByRowRange(Entity entity) throws Exception {
+        List<Entity> entities = null ;
+        Table table= getTable(entity.getName());
+        Scan scan = new Scan();
+        QueryCondition queryCondition = entity.getQueryCondition();
+        String[] time_stamp_range = queryCondition.getTime_stamp_range();
+        String startRow = queryCondition.getUser_id()+time_stamp_range[0];
+        String stopRow = queryCondition.getUser_id()+time_stamp_range[1];
+        scan.setStartRow(Bytes.toBytes(startRow));
+        scan.setStopRow(Bytes.toBytes(stopRow));
 
         ResultScanner resultScanner = table.getScanner(scan);
         entities = parseEntityList(resultScanner);

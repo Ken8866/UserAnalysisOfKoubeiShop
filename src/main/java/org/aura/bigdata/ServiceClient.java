@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.gson.JsonObject;
 import org.aura.bigdata.dao.base.HbaseDaoBase;
 import org.aura.bigdata.model.Entity;
+import org.aura.bigdata.model.UserLabels;
 import org.aura.bigdata.model.UserPay;
 import org.aura.bigdata.model.UserView;
 import org.aura.bigdata.service.QueryService;
@@ -68,6 +69,20 @@ public class ServiceClient {
         userPayEntity.setRow("9990843_1862_2015-11-24");
 
         String jsonParam = JSON.toJSONString(userPayEntity);
+        String resString = userPayQueryService.execute(jsonParam,AppConstants.SVC_TYPE_FIND);
+        return resString ;
+    }
+
+
+    public static String findUserLabels() throws Exception{
+        QueryService<UserLabels> userPayQueryService = getUserPayQueryService();
+        UserLabels userLabels = userPayQueryService.getT();
+        Entity<UserLabels> userLabelsEntity = new Entity<UserLabels>();
+        userLabelsEntity.setT(userLabels);
+        userLabelsEntity.setColumnFamily(new String[]{"colFmly"});
+        userLabelsEntity.setRow("9990843");
+
+        String jsonParam = JSON.toJSONString(userLabelsEntity);
         String resString = userPayQueryService.execute(jsonParam,AppConstants.SVC_TYPE_FIND);
         return resString ;
     }

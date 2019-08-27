@@ -1,4 +1,4 @@
-package org.aura.bigdata.Streaming;
+package org.aura.bigdata.spark.Streaming;
 
 import com.alibaba.fastjson.JSON;
 import org.aura.bigdata.JavaRedisClient;

@@ -3,7 +3,7 @@
 <configuration>
     <property>
         <name>hbase.rootdir</name>
-        <value>hdfs://hadoopnode:9000/hbase</value>
+        <value>hdfs://bigdata:9000/hbase</value>
     </property>
     <property>
         <name>hbase.cluster.distributed</name>
@@ -15,7 +15,7 @@
     </property>
     <property>
         <name>hbase.zookeeper.quorum</name>
-        <value>hadoopnode</value>
+        <value>bigdata</value>
     </property>
     <property>
         <name>zookeeper.session.timeout</name>

@@ -13,5 +13,6 @@ public interface EntityDao {
     public List<Entity> findAll(Entity entity) throws Exception ;
     public Long count(Entity entity) throws Exception ;
     public void deleteEntity(Entity entity) throws Exception ;
+    public List<Entity> findEntitiesByRowRange(Entity entity) throws Exception;
 
 }
