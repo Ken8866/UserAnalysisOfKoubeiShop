@@ -57,15 +57,15 @@ public class MetricsAnalysis implements Serializable {
         sparkSession.sparkContext().setLogLevel("WARN");
         MetricsAnalysis metricsAnalysis = new MetricsAnalysis();
 
-//        List<Dataset<Row>> userPayAnalysis = metricsAnalysis.userPayAnalysis(sparkSession, USER_PAY_URL);
+        List<Dataset<Row>> userPayAnalysis = metricsAnalysis.userPayAnalysis(sparkSession, USER_PAY_URL);
         shopInfoDataSet = metricsAnalysis.shopInfoAnalysis(sparkSession, SHOP_INFO_URL);
         shopInfoDataSet.cache();
         List<Dataset<Row>> userViewAnalysis = metricsAnalysis.userViewAnalysis(sparkSession, USER_VIEW_URL);
 
 
-//        metricsAnalysis.saveAnalysisResult(userPayAnalysis);
+        metricsAnalysis.saveAnalysisResult(userPayAnalysis);
         metricsAnalysis.saveAnalysisResult(userViewAnalysis);
-//        metricsAnalysis.saveShopScore(shopInfoDataSet);
+        metricsAnalysis.saveShopScore(shopInfoDataSet);
 
         sparkSession.stop();
     }
@@ -187,12 +187,12 @@ public class MetricsAnalysis implements Serializable {
 
         String sql7 = "select user_id, shop_id, count(*) as count from user_view group by user_id, shop_id order by user_id, shop_id " ;
 
-//        String[] sqls = new String[]{sql1, sql2, sql3, sql4, sql5, sql6};
-//
-//        for (String sql:sqls){
-//            Dataset<Row> dataset= userViewSqlContext.sql(sql);
-//            datasets.add(dataset);
-//        }
+        String[] sqls = new String[]{sql1, sql2, sql3, sql4, sql5, sql6};
+
+        for (String sql:sqls){
+            Dataset<Row> dataset= userViewSqlContext.sql(sql);
+            datasets.add(dataset);
+        }
 
         Dataset<Row> userCountView = userViewSqlContext.sql(sql7);
         userCountView.createOrReplaceTempView("user_view_count");
