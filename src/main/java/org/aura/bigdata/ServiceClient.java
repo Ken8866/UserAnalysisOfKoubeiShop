@@ -1,16 +1,14 @@
 package org.aura.bigdata;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.google.gson.JsonObject;
 import org.aura.bigdata.dao.base.HbaseDaoBase;
 import org.aura.bigdata.model.*;
 import org.aura.bigdata.service.QueryService;
 import org.aura.bigdata.service.impl.QueryServiceImpl;
+import org.aura.bigdata.utils.AppConstants;
+import org.aura.bigdata.utils.AppUtils;
 import org.aura.bigdata.utils.QueryCondition;
-import scala.App;
 
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +35,7 @@ public class ServiceClient {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception{
-        String resString = findShopLabels();
+        String resString = findUserLabels();
         System.out.println(resString);
     }
 
@@ -91,7 +89,7 @@ public class ServiceClient {
         userPayEntity.setT(userPay);
 //        userPayEntity.setColumnFamily(new String[]{"colFmly"});
         String jsonParam = JSON.toJSONString(userPayEntity);
-        String resString = userPayQueryService.execute(jsonParam,AppConstants.SVC_TYPE_COUNT);
+        String resString = userPayQueryService.execute(jsonParam, AppConstants.SVC_TYPE_COUNT);
 //        String resString = userPayQueryService.execute(jsonParam,AppConstants.SVC_TYPE_CREATE_TABLE);
 
         return resString;
@@ -122,16 +120,55 @@ public class ServiceClient {
      * @throws Exception
      */
     public static String findUserLabels() throws Exception{
+
+       /* Current count: 11799000, row: 9659170
+        Current count: 11800000, row: 9660874
+        Current count: 11801000, row: 9662519
+        Current count: 11802000, row: 9664207
+        Current count: 11803000, row: 9665899
+        Current count: 11804000, row: 9667582
+        Current count: 11805000, row: 9669262
+        Current count: 11806000, row: 9670959
+        Current count: 11807000, row: 9672640
+        Current count: 11808000, row: 9674384
+        Current count: 11809000, row: 9676099
+        Current count: 11810000, row: 9677774*/
+
+
+       /* {"cell":{"colFmly":{"city_name":"蚌埠"}},"row":"20228352"}
+        {"cell":{"colFmly":{"city_name":"南京"}},"row":"15240138"}
+        {"cell":{"colFmly":{"city_name":"北京"}},"row":"21320812"}
+        {"cell":{"colFmly":{"city_name":"上海"}},"row":"11491261"}
+        {"cell":{"colFmly":{"city_name":"上海"}},"row":"19014433"}
+        {"cell":{"colFmly":{"city_name":"金华"}},"row":"14510716"}
+        {"cell":{"colFmly":{"city_name":"南京"}},"row":"6755573"}
+        {"cell":{"colFmly":{"city_name":"杭州"}},"row":"10656101"}
+        {"cell":{"colFmly":{"city_name":"武汉"}},"row":"12642084"}
+        {"cell":{"colFmly":{"city_name":"深圳"}},"row":"2403242"}
+        {"cell":{"colFmly":{"city_name":"沈阳"}},"row":"22377939"}
+        {"cell":{"colFmly":{"city_name":"广州"}},"row":"19096787"}
+        {"cell":{"colFmly":{"city_name":"成都"}},"row":"17769131"}
+        {"cell":{"colFmly":{"city_name":"杭州"}},"row":"11140916"}
+        {"cell":{"colFmly":{"city_name":"成都"}},"row":"17821920"}
+        {"cell":{"colFmly":{"city_name":"上海"}},"row":"12077858"}
+        {"cell":{"colFmly":{"city_name":"苏州"}},"row":"5797375"}*/
+
+        String[] userIds = new String[]{"15042563","15262746","20228352","15240138","19014433","10656101","9672640","19096787","17821920","5797375"} ;
+
+        for(String s:userIds){
+
         QueryService<UserLabels> userLabelsQueryService = getUserLabelsQueryService();
         UserLabels userLabels = userLabelsQueryService.getT();
         Entity<UserLabels> userLabelsEntity = new Entity<UserLabels>();
         userLabelsEntity.setT(userLabels);
         userLabelsEntity.setColumnFamily(new String[]{"colFmly"});
-        userLabelsEntity.setRow("20314925");
+        userLabelsEntity.setRow(s);
 
         String jsonParam = JSON.toJSONString(userLabelsEntity);
         String resString = userLabelsQueryService.execute(jsonParam,AppConstants.SVC_TYPE_FIND);
-        return resString ;
+            System.out.println(resString);
+        }
+        return "***********************************" ;
     }
 
     /**
@@ -140,16 +177,39 @@ public class ServiceClient {
      * @throws Exception
      */
     public static String findShopLabels() throws Exception{
-        QueryService<ShopLabels> shopLabelQueryService = getShopLabelsQueryService();
-        ShopLabels shopLabels = shopLabelQueryService.getT();
-        Entity<ShopLabels> shopLabelsEntity = new Entity<ShopLabels>();
-        shopLabelsEntity.setT(shopLabels);
-        shopLabelsEntity.setColumnFamily(new String[]{"colFmly"});
-        shopLabelsEntity.setRow("1852");
 
-        String jsonParam = JSON.toJSONString(shopLabelsEntity);
-        String resString = shopLabelQueryService.execute(jsonParam,AppConstants.SVC_TYPE_FIND);
-        return resString ;
+        /*{"cell":{"colFmly":{"score":"3"}},"row":"1896"}
+        {"cell":{"colFmly":{"score":"3"}},"row":"1897"}
+        {"cell":{"colFmly":{"score":"3"}},"row":"1898"}
+        {"cell":{"colFmly":{"score":"3"}},"row":"1899"}
+        {"cell":{"colFmly":{"score":"4"}},"row":"1900"}
+        {"cell":{"colFmly":{"score":""}},"row":"1901"}
+        {"cell":{"colFmly":{"score":"3"}},"row":"1902"}
+        {"cell":{"colFmly":{"score":"3"}},"row":"1903"}
+        {"cell":{"colFmly":{"score":"3"}},"row":"1904"}
+        {"cell":{"colFmly":{"score":""}},"row":"1905"}
+        {"cell":{"colFmly":{"score":""}},"row":"1906"}
+        {"cell":{"colFmly":{"score":"4"}},"row":"1907"}
+        {"cell":{"colFmly":{"score":"1"}},"row":"1908"}
+        {"cell":{"colFmly":{"score":"3"}},"row":"1909"}
+        {"cell":{"colFmly":{"score":"0"}},"row":"1910"}*/
+
+        String[] shopIds = new String[]{"1896","1897","1898","1899","1900","1901","1905","1908","1909","1910"} ;
+
+        for(String s:shopIds){
+            QueryService<ShopLabels> shopLabelQueryService = getShopLabelsQueryService();
+            ShopLabels shopLabels = shopLabelQueryService.getT();
+            Entity<ShopLabels> shopLabelsEntity = new Entity<ShopLabels>();
+            shopLabelsEntity.setT(shopLabels);
+            shopLabelsEntity.setColumnFamily(new String[]{"colFmly"});
+            shopLabelsEntity.setRow(s);
+
+            String jsonParam = JSON.toJSONString(shopLabelsEntity);
+            String resString = shopLabelQueryService.execute(jsonParam,AppConstants.SVC_TYPE_FIND);
+
+            System.out.println(resString);
+        }
+        return "+++++++++++++++++++++++++++++" ;
     }
 
     /**

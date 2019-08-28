@@ -1,4 +1,4 @@
-package org.aura.bigdata;
+package org.aura.bigdata.utils;
 
 import org.apache.commons.io.FileUtils;
 import org.aura.bigdata.model.ShopInfo;

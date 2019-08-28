@@ -10,10 +10,8 @@ import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.aura.bigdata.AppUtils;
 
 import java.io.Serializable;
-import java.util.Properties;
 
 public class HbaseDaoBase implements Serializable {
 

@@ -12,7 +12,9 @@ public class UserLabels implements Serializable {
     private String last_1_month_pay ;
     private String last_3_month_pay ;
 
-    private String user_city ;
+    private String city_name ;
+
+    private String user_id;
 
     public String getLast_7_day_review() {
         return last_7_day_review;
@@ -62,11 +64,19 @@ public class UserLabels implements Serializable {
         this.last_3_month_pay = last_3_month_pay;
     }
 
-    public String getUser_city() {
-        return user_city;
+    public String getCity_name() {
+        return city_name;
     }
 
-    public void setUser_city(String user_city) {
-        this.user_city = user_city;
+    public void setCity_name(String city_name) {
+        this.city_name = city_name;
+    }
+
+    public String getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
     }
 }

@@ -1,4 +1,4 @@
-package org.aura.bigdata;
+package org.aura.bigdata.spark.core;
 
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;

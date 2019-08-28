@@ -57,15 +57,15 @@ public class MetricsAnalysis implements Serializable {
         sparkSession.sparkContext().setLogLevel("WARN");
         MetricsAnalysis metricsAnalysis = new MetricsAnalysis();
 
-        List<Dataset<Row>> userPayAnalysis = metricsAnalysis.userPayAnalysis(sparkSession, USER_PAY_URL);
+//        List<Dataset<Row>> userPayAnalysis = metricsAnalysis.userPayAnalysis(sparkSession, USER_PAY_URL);
         shopInfoDataSet = metricsAnalysis.shopInfoAnalysis(sparkSession, SHOP_INFO_URL);
         shopInfoDataSet.cache();
         List<Dataset<Row>> userViewAnalysis = metricsAnalysis.userViewAnalysis(sparkSession, USER_VIEW_URL);
 
 
-        metricsAnalysis.saveAnalysisResult(userPayAnalysis);
+//        metricsAnalysis.saveAnalysisResult(userPayAnalysis);
         metricsAnalysis.saveAnalysisResult(userViewAnalysis);
-        metricsAnalysis.saveShopScore(shopInfoDataSet);
+//        metricsAnalysis.saveShopScore(shopInfoDataSet);
 
         sparkSession.stop();
     }
@@ -99,9 +99,9 @@ public class MetricsAnalysis implements Serializable {
         userPayDF.createOrReplaceTempView("user_pay");
         SQLContext userPaySqlContext = userPayDF.sqlContext();
 
-        String sql1 = "select user_id ,count(distinct shop_id) as last_7_day_payed from user_pay  where trunc(to_date(time_stamp),'MM') BETWEEN date_sub(to_date('2016-10-31'),7) AND to_date('2016-10-31') group by user_id" ;
-        String sql2 = "select user_id ,count(distinct shop_id) as last_1_month_payed from user_pay  where trunc(to_date(time_stamp),'MM') BETWEEN add_months(to_date('2016-10-31'),-1) AND to_date('2016-10-31') group by user_id" ;
-        String sql3 = "select user_id ,count(distinct shop_id) as last_3_month_payed from user_pay  where trunc(to_date(time_stamp),'MM') BETWEEN add_months(to_date('2016-10-31'),-3) AND to_date('2016-10-31') group by user_id" ;
+        String sql1 = "select user_id ,count(distinct shop_id) as last_7_day_pay from user_pay  where trunc(to_date(time_stamp),'MM') BETWEEN date_sub(to_date('2016-10-31'),7) AND to_date('2016-10-31') group by user_id" ;
+        String sql2 = "select user_id ,count(distinct shop_id) as last_1_month_pay from user_pay  where trunc(to_date(time_stamp),'MM') BETWEEN add_months(to_date('2016-10-31'),-1) AND to_date('2016-10-31') group by user_id" ;
+        String sql3 = "select user_id ,count(distinct shop_id) as last_3_month_pay from user_pay  where trunc(to_date(time_stamp),'MM') BETWEEN add_months(to_date('2016-10-31'),-3) AND to_date('2016-10-31') group by user_id" ;
 
         String sql4 = "select shop_id ,count(*) as last_7_day_payed from user_pay  where trunc(to_date(time_stamp),'MM') BETWEEN date_sub(to_date('2016-10-31'),7) AND to_date('2016-10-31') group by shop_id" ;
         String sql5 = "select shop_id ,count(*) as last_1_month_payed from user_pay  where trunc(to_date(time_stamp),'MM') BETWEEN add_months(to_date('2016-10-31'),-1) AND to_date('2016-10-31') group by shop_id" ;
@@ -187,17 +187,18 @@ public class MetricsAnalysis implements Serializable {
 
         String sql7 = "select user_id, shop_id, count(*) as count from user_view group by user_id, shop_id order by user_id, shop_id " ;
 
-        String[] sqls = new String[]{sql1, sql2, sql3, sql4, sql5, sql6};
-
-        for (String sql:sqls){
-            Dataset<Row> dataset= userViewSqlContext.sql(sql);
-            datasets.add(dataset);
-        }
+//        String[] sqls = new String[]{sql1, sql2, sql3, sql4, sql5, sql6};
+//
+//        for (String sql:sqls){
+//            Dataset<Row> dataset= userViewSqlContext.sql(sql);
+//            datasets.add(dataset);
+//        }
 
         Dataset<Row> userCountView = userViewSqlContext.sql(sql7);
         userCountView.createOrReplaceTempView("user_view_count");
         Dataset<Row> user_shopCountDS = userCountView.sqlContext().sql("select user_id ,shop_id from user_view_count where (count,shop_id) in (select max(count) maxcount,shop_id from user_view_count group by shop_id) ");
-        Dataset<Row> user_cityDS = user_shopCountDS.join(shopInfoDataSet, "shop_id");
+        Dataset<Row> shopCityDS = shopInfoDataSet.select("shop_id", "city_name");
+        Dataset<Row> user_cityDS = user_shopCountDS.join(shopCityDS, "shop_id");
         Dataset<Row> user_cityDS2 = user_cityDS.select("user_id", "city_name");
         datasets.add(user_cityDS2);
 
@@ -206,6 +207,13 @@ public class MetricsAnalysis implements Serializable {
 
     public void saveShopScore(Dataset<Row> shopInfoDataSet) throws Exception{
         Dataset<Row> shopScoreDS = shopInfoDataSet.select("shop_id", "score");
+        List<Dataset<Row>> shopScoreDSList = new ArrayList<>();
+        shopScoreDSList.add(shopScoreDS);
+        saveAnalysisResult(shopScoreDSList);
+    }
+
+    public void saveShopCity(Dataset<Row> shopInfoDataSet) throws Exception{
+        Dataset<Row> shopScoreDS = shopInfoDataSet.select("shop_id", "city_name");
         List<Dataset<Row>> shopScoreDSList = new ArrayList<>();
         shopScoreDSList.add(shopScoreDS);
         saveAnalysisResult(shopScoreDSList);
@@ -230,7 +238,7 @@ public class MetricsAnalysis implements Serializable {
                 public void call(Iterator<Row> t) throws Exception {
 
                     Configuration conf = HBaseConfiguration.create();
-                    conf.set("hbase.zookeeper.quorum","bigdata");
+                    conf.set("hbase.zookeeper.quorum","hadoopnode");
                     conf.set("zookeeper.znode.parent", "/hbase");
                     Connection conn = ConnectionFactory.createConnection(conf);
                     Table userlabels = conn.getTable(TableName.valueOf("userlabels"));

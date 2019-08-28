@@ -1,7 +1,7 @@
 package org.aura.bigdata.spark.Streaming;
 
 import com.alibaba.fastjson.JSON;
-import org.aura.bigdata.JavaRedisClient;
+import org.aura.bigdata.utils.JavaRedisClient;
 import org.aura.bigdata.view.vo.ShopTrans;
 import redis.clients.jedis.Jedis;
 

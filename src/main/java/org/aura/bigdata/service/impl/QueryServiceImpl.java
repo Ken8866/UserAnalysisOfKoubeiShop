@@ -1,14 +1,12 @@
 package org.aura.bigdata.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import org.apache.hadoop.hbase.security.User;
-import org.aura.bigdata.AppConstants;
-import org.aura.bigdata.AppUtils;
+import org.aura.bigdata.utils.AppConstants;
+import org.aura.bigdata.utils.AppUtils;
 import org.aura.bigdata.dao.EntityDao;
 import org.aura.bigdata.dao.impl.EntityDaoImpl;
 import org.aura.bigdata.model.*;
 import org.aura.bigdata.service.QueryService;
-import org.aura.bigdata.utils.QueryCondition;
 import org.aura.bigdata.view.vo.UserBill;
 
 import java.util.ArrayList;
@@ -160,19 +158,20 @@ public class QueryServiceImpl<T> implements QueryService<T> {
             String last_1_month_review = cell.get("colFmly").get("last_1_month_review");
             String last_3_month_review = cell.get("colFmly").get("last_3_month_review");
 
-            String last_7_day_pay = cell.get("colFmly").get("last_7_day_pay");
-            String last_1_month_pay = cell.get("colFmly").get("last_1_month_pay");
-            String last_3_month_pay = cell.get("colFmly").get("last_3_month_pay");
+            String last_7_day_pay = cell.get("colFmly").get("last_7_day_payed");
+            String last_1_month_pay = cell.get("colFmly").get("last_1_month_payed");
+            String last_3_month_pay = cell.get("colFmly").get("last_3_month_payed");
 
-            String user_city = cell.get("colFmly").get("user_city");
+            String city_name = cell.get("colFmly").get("city_name");
 
+            userLabels.setUser_id(obj.getRow());
             userLabels.setLast_7_day_review(last_7_day_review);
             userLabels.setLast_1_month_review(last_1_month_review);
             userLabels.setLast_3_month_review(last_3_month_review);
             userLabels.setLast_7_day_pay(last_7_day_pay);
             userLabels.setLast_1_month_pay(last_1_month_pay);
             userLabels.setLast_3_month_pay(last_3_month_pay);
-            userLabels.setUser_city(user_city);
+            userLabels.setCity_name(city_name);
 
             userLabelsList.add(userLabels);
         }
@@ -196,6 +195,7 @@ public class QueryServiceImpl<T> implements QueryService<T> {
 
             String score = cell.get("colFmly").get("score");
 
+            shopLabels.setShop_id(obj.getRow());
             shopLabels.setLast_7_day_reviewed(last_7_day_reviewed);
             shopLabels.setLast_1_month_reviewed(last_1_month_reviewed);
             shopLabels.setLast_3_month_reviewed(last_3_month_reviewed);

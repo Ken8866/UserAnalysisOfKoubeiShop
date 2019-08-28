@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface EntityDao {
 
-    public void  createTable(String tableName,String[] familyNames) throws Exception ;
+    public void createTable(String tableName,String[] familyNames) throws Exception ;
     public void saveOrUpdate(Entity entity) throws Exception ;
     public Entity findEntity(Entity entity) throws Exception ;
     public List<Entity> findEntities(Entity entity) throws Exception ;

@@ -13,6 +13,8 @@ public class ShopLabels implements Serializable {
 
     private String score ;
 
+    private String shop_id ;
+
     public String getLast_7_day_reviewed() {
         return last_7_day_reviewed;
     }
@@ -67,5 +69,13 @@ public class ShopLabels implements Serializable {
 
     public void setScore(String score) {
         this.score = score;
+    }
+
+    public String getShop_id() {
+        return shop_id;
+    }
+
+    public void setShop_id(String shop_id) {
+        this.shop_id = shop_id;
     }
 }

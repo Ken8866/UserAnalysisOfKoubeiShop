@@ -1,7 +1,5 @@
-package org.aura.bigdata;
+package org.aura.bigdata.spark.Streaming;
 
-import com.alibaba.fastjson.JSONObject;
-import com.google.gson.JsonObject;
 import kafka.serializer.StringDecoder;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
@@ -17,10 +15,8 @@ import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaPairInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.kafka.KafkaUtils;
-import org.mortbay.util.ajax.JSON;
+import org.aura.bigdata.utils.JavaRedisClient;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 import scala.Option;
 import scala.Tuple2;
 

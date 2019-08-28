@@ -7,11 +7,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-public class MysqlDaoHelper extends MysqlDaoBase {
+public class ShopInfoMysqlDaoImpl extends MysqlDaoBase {
 
 
     public static void main(String[] args) {
-        MysqlDaoHelper mysqlDao = new MysqlDaoHelper();
+        ShopInfoMysqlDaoImpl mysqlDao = new ShopInfoMysqlDaoImpl();
         String exestatus = null;
         try {
             exestatus = mysqlDao.insert("1", "1", "1");

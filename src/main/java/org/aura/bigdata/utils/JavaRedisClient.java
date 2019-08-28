@@ -1,4 +1,4 @@
-package org.aura.bigdata;
+package org.aura.bigdata.utils;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
