@@ -9,12 +9,16 @@ import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.ForeachPartitionFunction;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.sql.*;
+import org.apache.spark.sql.types.StringType;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.aura.bigdata.dao.EntityDao;
@@ -24,6 +28,7 @@ import org.aura.bigdata.model.*;
 import org.aura.bigdata.service.QueryService;
 import org.aura.bigdata.service.impl.QueryServiceImpl;
 import scala.Tuple2;
+import scala.reflect.ClassTag;
 
 import java.io.Serializable;
 import java.util.*;
@@ -53,7 +58,7 @@ public class MetricsAnalysis implements Serializable {
 
     public static void main(String[] args) throws Exception{
 
-        SparkSession sparkSession = SparkSession.builder().master("local[*]").appName("userAnalysis").getOrCreate();
+        SparkSession sparkSession = SparkSession.builder().master("local[*]").appName("Metrics Analysis").getOrCreate();
         sparkSession.sparkContext().setLogLevel("WARN");
         MetricsAnalysis metricsAnalysis = new MetricsAnalysis();
 
@@ -99,13 +104,13 @@ public class MetricsAnalysis implements Serializable {
         userPayDF.createOrReplaceTempView("user_pay");
         SQLContext userPaySqlContext = userPayDF.sqlContext();
 
-        String sql1 = "select user_id ,count(distinct shop_id) as last_7_day_pay from user_pay  where trunc(to_date(time_stamp),'MM') BETWEEN date_sub(to_date('2016-10-31'),7) AND to_date('2016-10-31') group by user_id" ;
-        String sql2 = "select user_id ,count(distinct shop_id) as last_1_month_pay from user_pay  where trunc(to_date(time_stamp),'MM') BETWEEN add_months(to_date('2016-10-31'),-1) AND to_date('2016-10-31') group by user_id" ;
-        String sql3 = "select user_id ,count(distinct shop_id) as last_3_month_pay from user_pay  where trunc(to_date(time_stamp),'MM') BETWEEN add_months(to_date('2016-10-31'),-3) AND to_date('2016-10-31') group by user_id" ;
+        String sql1 = "select user_id ,count(1) as last_7_day_pay from user_pay  where to_date(time_stamp) BETWEEN date_sub(to_date('2016-10-31'),7) AND to_date('2016-10-31') group by user_id" ;
+        String sql2 = "select user_id ,count(1) as last_1_month_pay from user_pay  where to_date(time_stamp) BETWEEN add_months(to_date('2016-10-31'),-1) AND to_date('2016-10-31') group by user_id" ;
+        String sql3 = "select user_id ,count(1) as last_3_month_pay from user_pay  where to_date(time_stamp) BETWEEN add_months(to_date('2016-10-31'),-3) AND to_date('2016-10-31') group by user_id" ;
 
-        String sql4 = "select shop_id ,count(*) as last_7_day_payed from user_pay  where trunc(to_date(time_stamp),'MM') BETWEEN date_sub(to_date('2016-10-31'),7) AND to_date('2016-10-31') group by shop_id" ;
-        String sql5 = "select shop_id ,count(*) as last_1_month_payed from user_pay  where trunc(to_date(time_stamp),'MM') BETWEEN add_months(to_date('2016-10-31'),-1) AND to_date('2016-10-31') group by shop_id" ;
-        String sql6 = "select shop_id ,count(*) as last_3_month_payed from user_pay where trunc(to_date(time_stamp),'MM') BETWEEN add_months(to_date('2016-10-31'),-3) AND to_date('2016-10-31') group by shop_id" ;
+        String sql4 = "select shop_id ,count(1) as last_7_day_payed from user_pay  where to_date(time_stamp) BETWEEN date_sub(to_date('2016-10-31'),7) AND to_date('2016-10-31') group by shop_id" ;
+        String sql5 = "select shop_id ,count(1) as last_1_month_payed from user_pay  where to_date(time_stamp) BETWEEN add_months(to_date('2016-10-31'),-1) AND to_date('2016-10-31') group by shop_id" ;
+        String sql6 = "select shop_id ,count(1) as last_3_month_payed from user_pay where to_date(time_stamp) BETWEEN add_months(to_date('2016-10-31'),-3) AND to_date('2016-10-31') group by shop_id" ;
 
         String[] sqls = new String[]{sql1, sql2, sql3, sql4, sql5, sql6};
 
@@ -176,13 +181,13 @@ public class MetricsAnalysis implements Serializable {
         userViewDF.createOrReplaceTempView("user_view");
         SQLContext userViewSqlContext = userViewDF.sqlContext();
 
-        String sql1 = "select user_id ,count(distinct shop_id) as last_7_day_review from user_view  where trunc(to_date(time_stamp),'MM') BETWEEN date_sub(to_date('2016-10-31'),7) AND to_date('2016-10-31') group by user_id" ;
-        String sql2 = "select user_id ,count(distinct shop_id) as last_1_month_review from user_view  where trunc(to_date(time_stamp),'MM') BETWEEN add_months(to_date('2016-10-31'),-1) AND to_date('2016-10-31') group by user_id" ;
-        String sql3 = "select user_id ,count(distinct shop_id) as last_3_month_review from user_view  where trunc(to_date(time_stamp),'MM') BETWEEN add_months(to_date('2016-10-31'),-3) AND to_date('2016-10-31') group by user_id" ;
+        String sql1 = "select user_id ,count(distinct shop_id) as last_7_day_review from user_view  where to_date(time_stamp) BETWEEN date_sub(to_date('2016-10-31'),7) AND to_date('2016-10-31') group by user_id" ;
+        String sql2 = "select user_id ,count(distinct shop_id) as last_1_month_review from user_view  where to_date(time_stamp) BETWEEN add_months(to_date('2016-10-31'),-1) AND to_date('2016-10-31') group by user_id" ;
+        String sql3 = "select user_id ,count(distinct shop_id) as last_3_month_review from user_view  where to_date(time_stamp) BETWEEN add_months(to_date('2016-10-31'),-3) AND to_date('2016-10-31') group by user_id" ;
 
-        String sql4 = "select shop_id ,count(*) as last_7_day_reviewed from user_view  where trunc(to_date(time_stamp),'MM') BETWEEN date_sub(to_date('2016-10-31'),7) AND to_date('2016-10-31') group by shop_id" ;
-        String sql5 = "select shop_id ,count(*) as last_1_month_reviewed from user_view  where trunc(to_date(time_stamp),'MM') BETWEEN add_months(to_date('2016-10-31'),-1) AND to_date('2016-10-31') group by shop_id" ;
-        String sql6 = "select shop_id ,count(*) as last_3_month_reviewed from user_view  where trunc(to_date(time_stamp),'MM') BETWEEN add_months(to_date('2016-10-31'),-3) AND to_date('2016-10-31') group by shop_id" ;
+        String sql4 = "select shop_id ,count(*) as last_7_day_reviewed from user_view  where to_date(time_stamp) BETWEEN date_sub(to_date('2016-10-31'),7) AND to_date('2016-10-31') group by shop_id" ;
+        String sql5 = "select shop_id ,count(*) as last_1_month_reviewed from user_view  where to_date(time_stamp) BETWEEN add_months(to_date('2016-10-31'),-1) AND to_date('2016-10-31') group by shop_id" ;
+        String sql6 = "select shop_id ,count(*) as last_3_month_reviewed from user_view  where to_date(time_stamp) BETWEEN add_months(to_date('2016-10-31'),-3) AND to_date('2016-10-31') group by shop_id" ;
 
 
         String sql7 = "select user_id, shop_id, count(*) as count from user_view group by user_id, shop_id order by user_id, shop_id " ;
@@ -284,6 +289,7 @@ public class MetricsAnalysis implements Serializable {
 
                 }
             });
+
         }
 
     }
