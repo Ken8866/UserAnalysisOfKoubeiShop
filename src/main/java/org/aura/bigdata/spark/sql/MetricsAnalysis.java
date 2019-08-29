@@ -53,8 +53,9 @@ public class MetricsAnalysis implements Serializable {
     public static final String USER_VIEW_HDFS_URL = "hdfs://bigdata:9000/koubei/rawdata/user_view.txt";
     public static final String SHOP_INFO_HDFS_URL = "hdfs://bigdata:9000/koubei/rawdata/user_view.txt";
 
-    List<Dataset<Row>> userPayAnalysis = null ;
     public static Dataset<Row> shopInfoDataSet = null ;
+    public static Dataset<Row> userPayDF = null ;
+    public static Dataset<Row> userViewDF = null ;
 
     public static void main(String[] args) throws Exception{
 
@@ -85,6 +86,7 @@ public class MetricsAnalysis implements Serializable {
     public List<Dataset<Row>> userPayAnalysis(SparkSession sparkSession,String dataSource) throws Exception{
 
         ArrayList<Dataset<Row>> datasets = new ArrayList<>();
+
         JavaRDD<Row> userPayRowRDD = sparkSession.read().text(dataSource).javaRDD();
 
         JavaRDD<UserPay> userPayRDD = userPayRowRDD.map(new Function<Row, UserPay>() {
@@ -99,10 +101,11 @@ public class MetricsAnalysis implements Serializable {
             }
         });
 
-        Dataset<Row> userPayDF = sparkSession.createDataFrame(userPayRDD, UserPay.class);
+        userPayDF = sparkSession.createDataFrame(userPayRDD, UserPay.class);
 
         userPayDF.createOrReplaceTempView("user_pay");
         SQLContext userPaySqlContext = userPayDF.sqlContext();
+        userPayDF.cache();
 
         String sql1 = "select user_id ,count(1) as last_7_day_pay from user_pay  where to_date(time_stamp) BETWEEN date_sub(to_date('2016-10-31'),7) AND to_date('2016-10-31') group by user_id" ;
         String sql2 = "select user_id ,count(1) as last_1_month_pay from user_pay  where to_date(time_stamp) BETWEEN add_months(to_date('2016-10-31'),-1) AND to_date('2016-10-31') group by user_id" ;
@@ -177,20 +180,21 @@ public class MetricsAnalysis implements Serializable {
             }
         });
 
-        Dataset<Row> userViewDF = sparkSession.createDataFrame(userViewRDD,UserView.class);
+        userViewDF = sparkSession.createDataFrame(userViewRDD,UserView.class);
         userViewDF.createOrReplaceTempView("user_view");
         SQLContext userViewSqlContext = userViewDF.sqlContext();
+        userViewDF.cache();
 
         String sql1 = "select user_id ,count(distinct shop_id) as last_7_day_review from user_view  where to_date(time_stamp) BETWEEN date_sub(to_date('2016-10-31'),7) AND to_date('2016-10-31') group by user_id" ;
         String sql2 = "select user_id ,count(distinct shop_id) as last_1_month_review from user_view  where to_date(time_stamp) BETWEEN add_months(to_date('2016-10-31'),-1) AND to_date('2016-10-31') group by user_id" ;
         String sql3 = "select user_id ,count(distinct shop_id) as last_3_month_review from user_view  where to_date(time_stamp) BETWEEN add_months(to_date('2016-10-31'),-3) AND to_date('2016-10-31') group by user_id" ;
 
-        String sql4 = "select shop_id ,count(*) as last_7_day_reviewed from user_view  where to_date(time_stamp) BETWEEN date_sub(to_date('2016-10-31'),7) AND to_date('2016-10-31') group by shop_id" ;
-        String sql5 = "select shop_id ,count(*) as last_1_month_reviewed from user_view  where to_date(time_stamp) BETWEEN add_months(to_date('2016-10-31'),-1) AND to_date('2016-10-31') group by shop_id" ;
-        String sql6 = "select shop_id ,count(*) as last_3_month_reviewed from user_view  where to_date(time_stamp) BETWEEN add_months(to_date('2016-10-31'),-3) AND to_date('2016-10-31') group by shop_id" ;
+        String sql4 = "select shop_id ,count(1) as last_7_day_reviewed from user_view  where to_date(time_stamp) BETWEEN date_sub(to_date('2016-10-31'),7) AND to_date('2016-10-31') group by shop_id" ;
+        String sql5 = "select shop_id ,count(1) as last_1_month_reviewed from user_view  where to_date(time_stamp) BETWEEN add_months(to_date('2016-10-31'),-1) AND to_date('2016-10-31') group by shop_id" ;
+        String sql6 = "select shop_id ,count(1) as last_3_month_reviewed from user_view  where to_date(time_stamp) BETWEEN add_months(to_date('2016-10-31'),-3) AND to_date('2016-10-31') group by shop_id" ;
 
 
-        String sql7 = "select user_id, shop_id, count(*) as count from user_view group by user_id, shop_id order by user_id, shop_id " ;
+        String sql7 = "select user_id, shop_id, count(1) as count from user_view group by user_id, shop_id " ;
 
         String[] sqls = new String[]{sql1, sql2, sql3, sql4, sql5, sql6};
 
@@ -200,8 +204,8 @@ public class MetricsAnalysis implements Serializable {
         }
 
         Dataset<Row> userCountView = userViewSqlContext.sql(sql7);
-        userCountView.createOrReplaceTempView("user_view_count");
-        Dataset<Row> user_shopCountDS = userCountView.sqlContext().sql("select user_id ,shop_id from user_view_count where (count,shop_id) in (select max(count) maxcount,shop_id from user_view_count group by shop_id) ");
+        userCountView.createOrReplaceTempView("view_shop_count");
+        Dataset<Row> user_shopCountDS = userCountView.sqlContext().sql("select max(count) maxcount, shop_id, user_id from view_shop_count group by shop_id, user_id) ");
         Dataset<Row> shopCityDS = shopInfoDataSet.select("shop_id", "city_name");
         Dataset<Row> user_cityDS = user_shopCountDS.join(shopCityDS, "shop_id");
         Dataset<Row> user_cityDS2 = user_cityDS.select("user_id", "city_name");
